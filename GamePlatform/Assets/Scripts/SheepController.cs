@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
 public class SheepController : MonoBehaviour
 {
     public GameObject sheep;
 
-    private Sheep[] neighbours; // Array to hold the sheep's neighbours
+    private GameObject[] neighbours; // Array to hold the sheep's neighbours
 
     private Vector2 flockVector;  // Average Direction of the neighbours
     private Vector2 optimalVector; // Direction to move to the centre of the flock
@@ -48,9 +49,11 @@ public class SheepController : MonoBehaviour
         //TODO: Just be careful here, I don't want to myVector to become too big
 
         // Work out my best move
-        myVector = transform.position + flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
+        myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
+        transform.position += myVector;
 
-        //Make my move
+        // Make my move
+        // Move to the new position
 
     }
 
