@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -16,15 +17,17 @@ public class GameController : MonoBehaviour
         flock = new GameObject[noOfSheep];
         for (int i = 0; i < noOfSheep; i++)
         {
-            flock[i] = Instantiate(sheepPrefab);
+            flock[i] = Instantiate(sheepPrefab);  // Problem here: Instantiate only makes GameObjects but I want a SheepController
             flock[i].transform.position = new Vector2(UnityEngine.Random.value * 9 - 4.5f, UnityEngine.Random.value * 7 - 3.5f);
-        }
-
+        }        
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            
+        }
     }
 }
