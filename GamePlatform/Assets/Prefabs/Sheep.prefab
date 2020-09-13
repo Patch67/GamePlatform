@@ -135,4 +135,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testRadius: 1
-  fear: 10
+  neighbours: []
+  fear: 0.05

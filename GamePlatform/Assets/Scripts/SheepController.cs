@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System;
-using System.Diagnostics;
-
+using System.Collections.Generic;
 
 public class SheepController : MonoBehaviour
 {
     public int testRadius;
     //public GameObject sheep;  // Why?
     private int mask;
-    public GameObject[] neighbours; // Array to hold the sheep's neighbours
+    //public GameObject[] neighbours; // Array to hold the sheep's neighbours
+    public List<GameObject> neighbours = new List<GameObject>();
 
     private Vector2 flockVector;  // Average Direction of the neighbours
     private Vector2 optimalVector; // Direction to move to the centre of the flock
@@ -24,15 +24,18 @@ public class SheepController : MonoBehaviour
     private int noOfSheep;   // Number of sheep in local flock
 
     bool m_Started; // CHECK FOR GIZMOS, ONLY IN PLAY MODE
+    private Rigidbody2D m_Rigidbody2D;
+
     // Start is called before the first frame update
     void Start()
     {
         m_Started = true;// We are in play mode, used for gizmos
+        m_Rigidbody2D = GetComponent<Rigidbody2D>();
         mask = LayerMask.GetMask("Sheep"); // The layer used for all sheep
        
         noOfSheep = 7;
-        neighbours = new GameObject[7]; // Set up a blank array for 7 sheep
-        fear = 0; // No fear on start
+        //neighbours = new GameObject[7]; // Set up a blank array for 7 sheep
+        //fear = 0; // No fear on start
         //Give the sheep an initial random direction to move in
 
     }
@@ -60,8 +63,10 @@ public class SheepController : MonoBehaviour
         myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
 
         // Make my move to the new position
-        Vector3 myVector3 = new Vector3(myVector.x, myVector.y, 0); // Required to stop error on next line
+        /*Vector3 myVector3 = new Vector3(myVector.x, myVector.y, 0); // Required to stop error on next line
         transform.position += myVector3 * Time.deltaTime; // Add the new vector to the original vector
+        */
+        m_Rigidbody2D.AddForce(myVector, ForceMode2D.Impulse);
     }
     /// <summary>
     /// Uses a bounding box to get all of the neighbours.
@@ -72,17 +77,14 @@ public class SheepController : MonoBehaviour
         //UnityEngine.Debug.Log("Looking for neighbours");
         //UnityEngine.Debug.Log("Local Scale is " + transform.localScale);
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(gameObject.transform.position, testRadius,mask);
-        int noOfColliders = hitColliders.Length;
-        if(noOfColliders>0)
-        { 
-            UnityEngine.Debug.Log("No of colliders is " + noOfColliders);
-            int maxCount = Math.Min(noOfSheep, noOfColliders);
-            for (int i = 0; i < maxCount; i++)
-            {
-                neighbours[i] = hitColliders[i].gameObject;
-            }
+        neighbours.Clear(); //Get rid of the old list
+        //Make a new list
+        foreach(Collider2D collider in hitColliders)
+        {
+            neighbours.Add(collider.gameObject);//Add each to the list
         }
     }
+
     /// <summary>
     /// Get the average direction of my flock
     /// </summary>
@@ -91,17 +93,34 @@ public class SheepController : MonoBehaviour
     {
         return Vector2.zero;
     }
+
     /// <summary>
     /// Get the direction to move me in to the centre of the flock
     /// </summary>
     /// <returns>The vector pointing me to the centre of the flock</returns>
     public Vector2 GetOptimalVector()
     {
-        Vector2 average;
-        average = Vector2.one;
+        //Find min and max coordinates
+        float minX = float.MaxValue;
+        float minY = float.MaxValue;
+        float maxX = -float.MaxValue;
+        float maxY = -float.MaxValue;
+        foreach(GameObject go in neighbours)
+        {
+            minX = Math.Min(minX, go.transform.position.x);
+            minY = Math.Min(minY, go.transform.position.y);
+            maxX = Math.Max(maxX, go.transform.position.x);
+            maxY = Math.Max(maxY, go.transform.position.y);
+        }
 
-        return Vector2.zero;
+        //Find centre position
+        Vector2 centre = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
+
+        //Find vector to centre position
+
+        return centre-(Vector2)transform.position;
     }
+
     /// <summary>
     /// Gets the direction to move in to move me towards neighbouing flock
     /// </summary>
