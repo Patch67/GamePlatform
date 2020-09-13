@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System;
 using UnityEngine;
 
 public class FlockController : MonoBehaviour
@@ -18,7 +16,7 @@ public class FlockController : MonoBehaviour
         for(int i=0;i<noOfSheep;i++)
         {
             flock[i] = Instantiate(sheepPrefab);
-            flock[i].transform.position = new Vector2(Random.value * 9 - 4.5f, Random.value * 7 - 3.5f);
+            flock[i].transform.position = new Vector2(UnityEngine.Random.value * 9 - 4.5f, UnityEngine.Random.value * 7 - 3.5f);
         }
 
     }
@@ -29,10 +27,15 @@ public class FlockController : MonoBehaviour
         
     }
 
-    public GameObject[] GetNeighbours(int number,Vector2 position)
+    public void GetNeighbours()
     {
-        Responce r0 = Find(position, 0);
-        Responce r1 = Find(position, r0.distance);
+        Collider[] hitColliders = Physics.OverlapBox(gameObject.transform.position, transform.localScale / 2, Quaternion.identity, LayerMask.GetMask("Sheep"));
+        int noOfColliders = hitColliders.Length;
+        int maxCount = Math.Min(noOfSheep, noOfColliders);
+        for(int i=0;i<maxCount;i++)
+        {
+            flock[i] = hitColliders[i].gameObject;
+        }
 
 
     }

@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
+﻿using UnityEngine;
+using System;
 
+[RequireComponent(typeof(Rigidbody))]
 public class SheepController : MonoBehaviour
 {
     public GameObject sheep;
@@ -20,12 +19,14 @@ public class SheepController : MonoBehaviour
     private float fear; // How scared am i?
 
     private Vector2 myVector; // The direction that I will move in
+    private int noOfSheep;   // Number of sheep in local flock
 
 
     // Start is called before the first frame update
     void Start()
     {
-        neighbours = new Sheep[7]; // Set up a blank array for 7 sheep
+        noOfSheep = 7;
+        neighbours = new GameObject[7]; // Set up a blank array for 7 sheep
         fear = 0; // No fear on start
     }
 
@@ -33,12 +34,12 @@ public class SheepController : MonoBehaviour
     void Update()
     {
         // Who are my neighbours?
-        neighbours = GetNeighbours();  // Find my neighbours
+        GetNeighbours();  // Find my neighbours
 
         // What are my neighbours doing?
         flockVector = GetFlockDirection();  // What direction are they moving in
-        optimalVector = GetOptimalvector(); // What direction to put me in the middle of the flock, don't want to be caught on the edge
-        populationVector = getPopulationVector();  // Which direction is the herd moving in general
+        optimalVector = GetOptimalVector(); // What direction to put me in the middle of the flock, don't want to be caught on the edge
+        populationVector = GetPopulationVector();  // Which direction is the herd moving in general
 
         //How scared should I be?
 
@@ -50,12 +51,44 @@ public class SheepController : MonoBehaviour
 
         // Work out my best move
         myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
-        transform.position += myVector;
 
-        // Make my move
-        // Move to the new position
-
+        // Make my move to the new position
+        Vector3 myVector3 = new Vector3(myVector.x, myVector.y, 0); // Required to stop error on next line
+        transform.position += myVector3; // Add the new vector to the original vector
     }
 
-
+    public void GetNeighbours()
+    {
+        Collider[] hitColliders = Physics.OverlapBox(gameObject.transform.position, transform.localScale / 2, Quaternion.identity, LayerMask.GetMask("Sheep"));
+        int noOfColliders = hitColliders.Length;
+        int maxCount = Math.Min(noOfSheep, noOfColliders);
+        for (int i = 0; i < maxCount; i++)
+        {
+            neighbours[i] = hitColliders[i].gameObject;
+        }
+    }
+    /// <summary>
+    /// Get the average direction of my flock
+    /// </summary>
+    /// <returns>Vector2 direction of flock</returns>
+    public Vector2 GetFlockDirection()
+    {
+        return Vector2.zero;
+    }
+    /// <summary>
+    /// Get the direction to move me in to the centre of the flock
+    /// </summary>
+    /// <returns>The vector pointing me to the centre of the flock</returns>
+    public Vector2 GetOptimalVector()
+    {
+        return Vector2.zero;
+    }
+    /// <summary>
+    /// Gets the direction to move in to move me towards neighbouing flock
+    /// </summary>
+    /// <returns>The direction to the neighbouring flock</returns>
+    public Vector2 GetPopulationVector()
+    {
+        return Vector2.zero;
+    }
 }
