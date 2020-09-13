@@ -66,7 +66,7 @@ public class SheepController : MonoBehaviour
         /*Vector3 myVector3 = new Vector3(myVector.x, myVector.y, 0); // Required to stop error on next line
         transform.position += myVector3 * Time.deltaTime; // Add the new vector to the original vector
         */
-        m_Rigidbody2D.AddForce(myVector, ForceMode2D.Impulse);
+        m_Rigidbody2D.AddForce(myVector*Time.deltaTime, ForceMode2D.Impulse);
     }
     /// <summary>
     /// Uses a bounding box to get all of the neighbours.
