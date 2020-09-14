@@ -26,12 +26,15 @@ public class SheepController : MonoBehaviour
 
     bool m_Started; // CHECK FOR GIZMOS, ONLY IN PLAY MODE
     private Rigidbody2D m_Rigidbody2D;
+    private CircleCollider2D circleCollider2D;
 
     // Start is called before the first frame update
     void Start()
     {
         m_Started = true;// We are in play mode, used for gizmos
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
+        circleCollider2D = GetComponent<CircleCollider2D>();
+
         mask = LayerMask.GetMask("Sheep"); // The layer used for all sheep
 
         //noOfSheep = 7;
@@ -41,7 +44,14 @@ public class SheepController : MonoBehaviour
         myVector = Vector2.one;
     }
 
-    // Update is called once per frame
+    void Update()
+    {
+        //TODO: How big should my personal space be?
+        circleCollider2D.radius = (1 - fear) ; // The higher the feat the closer they will want to be
+    }
+
+
+    // FixedUpdate is called once per frame it is linked to physics engine activity
     void FixedUpdate()
     {
         // Who are my neighbours?
@@ -52,7 +62,7 @@ public class SheepController : MonoBehaviour
         optimalVector = GetOptimalVector(); // What direction to put me in the middle of the flock, don't want to be caught on the edge
         populationVector = GetPopulationVector();  // Which direction is the herd moving in general
 
-        //How scared should I be?
+        //TODO: How scared should I be?
 
         // What are my weights
         flockWeight = 1 * fear;
@@ -61,6 +71,10 @@ public class SheepController : MonoBehaviour
 
         // Work out my best move
         myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
+
+
+        //TODO: Need to speed limit the myVector to a maximum magnitude
+
 
         // Make my move to the new position
         m_Rigidbody2D.AddForce(myVector*Time.deltaTime, ForceMode2D.Impulse);
