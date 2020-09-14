@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class SheepController : MonoBehaviour
 {
-    public int testRadius;
+    public float testRadius;
     //public GameObject sheep;  // Why?
     private int mask;
     //public GameObject[] neighbours; // Array to hold the sheep's neighbours
@@ -20,8 +21,8 @@ public class SheepController : MonoBehaviour
 
     public float fear; // How scared am i?
 
-    private Vector2 myVector; // The direction that I will move in
-    private int noOfSheep;   // Number of sheep in local flock
+    private  Vector2 myVector; // The direction that I will move in
+    public int noOfSheep;   // Number of sheep in local flock
 
     bool m_Started; // CHECK FOR GIZMOS, ONLY IN PLAY MODE
     private Rigidbody2D m_Rigidbody2D;
@@ -32,12 +33,12 @@ public class SheepController : MonoBehaviour
         m_Started = true;// We are in play mode, used for gizmos
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
         mask = LayerMask.GetMask("Sheep"); // The layer used for all sheep
-       
-        noOfSheep = 7;
-        //neighbours = new GameObject[7]; // Set up a blank array for 7 sheep
-        //fear = 0; // No fear on start
-        //Give the sheep an initial random direction to move in
 
+        //noOfSheep = 7;
+        //fear = 0; // No fear on start
+
+        //Give the sheep an initial random direction to move in
+        myVector = Vector2.one;
     }
 
     // Update is called once per frame
@@ -55,19 +56,16 @@ public class SheepController : MonoBehaviour
 
         // What are my weights
         flockWeight = 1 * fear;
-        optimalWeight = 2 * fear;
-        populationWeight = 2 * fear;
-        //TODO: Just be careful here, I don't want to myVector to become too big
+        optimalWeight = 1 * fear;
+        populationWeight = 1 * fear;
 
         // Work out my best move
         myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
 
         // Make my move to the new position
-        /*Vector3 myVector3 = new Vector3(myVector.x, myVector.y, 0); // Required to stop error on next line
-        transform.position += myVector3 * Time.deltaTime; // Add the new vector to the original vector
-        */
         m_Rigidbody2D.AddForce(myVector*Time.deltaTime, ForceMode2D.Impulse);
     }
+
     /// <summary>
     /// Uses a bounding box to get all of the neighbours.
     /// Note there may not be 7 neighbours, there may be more or less
@@ -83,6 +81,16 @@ public class SheepController : MonoBehaviour
         {
             neighbours.Add(collider.gameObject);//Add each to the list
         }
+        //If we have too many neighbours make the test circle 10% smaller
+        if (hitColliders.Length > noOfSheep)
+        {
+            testRadius *= 0.9f;
+        }
+        // If we have too many neighbours make the test circle 10% larger
+        else if(hitColliders.Length<noOfSheep)
+        {
+            testRadius *= 1.1f;
+        }
     }
 
     /// <summary>
@@ -91,7 +99,22 @@ public class SheepController : MonoBehaviour
     /// <returns>Vector2 direction of flock</returns>
     public Vector2 GetFlockDirection()
     {
-        return Vector2.zero;
+        Vector2 dir = Vector2.zero;
+        if (neighbours.Count > 0)
+        {
+            foreach (GameObject go in neighbours)
+            {
+                //Important: This is how to get access to a subclass proerties
+                SheepController sheep = go.GetComponent<SheepController>();
+                //UnityEngine.Debug.Log("Sheep is " + sheep);
+                //if (sheep) UnityEngine.Debug.Log("Sheep " + sheep.myVector);
+                //else UnityEngine.Debug.Log("Not a sheep");
+                dir += sheep.myVector;
+            }
+            //UnityEngine.Debug.Log("Direction = " + dir + " neighbours is " + neighbours.Count);
+            dir /= neighbours.Count;
+        }
+        return dir;
     }
 
     /// <summary>
@@ -129,6 +152,7 @@ public class SheepController : MonoBehaviour
     {
         return Vector2.zero;
     }
+
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -140,8 +164,5 @@ public class SheepController : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, testRadius);
         }
     }
-    public static void Show(SheepController sheep)
-    {
-        UnityEngine.Debug.Log(sheep);
-    }
+    
 }

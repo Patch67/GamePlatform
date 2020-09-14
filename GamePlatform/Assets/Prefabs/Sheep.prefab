@@ -121,7 +121,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 1
 --- !u!114 &-7326600444974194311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,4 +136,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   testRadius: 1
   neighbours: []
-  fear: 0.1
+  fear: 0.25
+  noOfSheep: 7

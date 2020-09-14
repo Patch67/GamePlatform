@@ -13,7 +13,7 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        noOfSheep = 100;
+        //noOfSheep = 100;
         flock = new GameObject[noOfSheep];
         for (int i = 0; i < noOfSheep; i++)
         {
