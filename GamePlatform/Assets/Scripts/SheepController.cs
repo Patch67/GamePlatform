@@ -14,11 +14,12 @@ public class SheepController : MonoBehaviour
     private Vector2 flockVector;  // Average Direction of the neighbours
     private Vector2 optimalVector; // Direction to move to the centre of the flock
     private Vector2 populationVector; // Direction that the rest of the herd is moving (Lower weight, only check the nearest coule of flocks)
+    private Vector2 dogVector;  // Direction to te dog
 
     private float flockWeight; // How much weight should I give to the flock's direction
     private float optimalWeight; // How much weight should I give to the optimal's direction
     private float populationWeight; // How much weight should I give to the population's direction
-
+    private float dogWeight; //How much should I be worried about the dog?
     public float fear; // How scared am i?
 
     private  Vector2 myVector; // The direction that I will move in
@@ -28,12 +29,16 @@ public class SheepController : MonoBehaviour
     private Rigidbody2D m_Rigidbody2D;
     private CircleCollider2D circleCollider2D;
 
+
+    private GameController gameController;
+
     // Start is called before the first frame update
     void Start()
     {
         m_Started = true;// We are in play mode, used for gizmos
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
         circleCollider2D = GetComponent<CircleCollider2D>();
+        gameController = FindObjectOfType<GameController>();
 
         mask = LayerMask.GetMask("Sheep"); // The layer used for all sheep
 
@@ -46,7 +51,7 @@ public class SheepController : MonoBehaviour
 
     void Update()
     {
-        //TODO: How big should my personal space be?
+        //How big should my personal space be?
         circleCollider2D.radius = (1 - fear) ; // The higher the feat the closer they will want to be
     }
 
@@ -56,6 +61,7 @@ public class SheepController : MonoBehaviour
     {
         // Who are my neighbours?
         GetNeighbours();  // Find my neighbours
+//        UnityEngine.Debug.Log("Differece " + myVector + "; " + m_Rigidbody2D.velocity);
 
         // What are my neighbours doing?
         flockVector = GetFlockDirection();  // What direction are they moving in
@@ -63,14 +69,39 @@ public class SheepController : MonoBehaviour
         populationVector = GetPopulationVector();  // Which direction is the herd moving in general
 
         //TODO: How scared should I be?
+        // Am I exposed to the dog?
+        //Work out vector from me to the dog
+        dogVector = GetDogVector();
+        //UnityEngine.Debug.Log(dogVector);
+
+        //Cast a ray from me to the dog
+        RaycastHit2D hit = Physics2D.Raycast((Vector2)transform.position+(dogVector.normalized*testRadius), dogVector, 5);
+        //See if it hit a sheep, meaning I am covered
+        //UnityEngine.Debug.Log("Hit is " + hit.rigidbody.name);
+        if (hit.collider != null)
+        {
+            //UnityEngine.Debug.Log("2nd hit is " + hit.collider.name + " distance is " + hit.distance);
+            if (hit.collider.name == "dog(Clone)")
+            {
+                //UnityEngine.Debug.Log("We got the dog, at last.");
+                fear *= 1.0001f; // Up the fear a little bit
+                dogWeight = 1;
+            }
+            else
+            {
+                dogWeight = 0;
+            }
+        }
+        // Can I get another sheep between me and the dog?
 
         // What are my weights
         flockWeight = 1 * fear;
-        optimalWeight = 1 * fear;
+        optimalWeight = 0 * fear;
         populationWeight = 1 * fear;
+        //dogWeight = .2f * fear;
 
         // Work out my best move
-        myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight;
+        myVector = flockVector * flockWeight + optimalVector * optimalWeight + populationVector * populationWeight - dogVector*dogWeight;
 
 
         //TODO: Need to speed limit the myVector to a maximum magnitude
@@ -167,8 +198,17 @@ public class SheepController : MonoBehaviour
         return Vector2.zero;
     }
 
-    void OnDrawGizmos()
+    /// <summary>
+    /// Gets a vector from sheep to dog.
+    /// Tested 14/09/2020 PAB
+    /// </summary>
+    /// <returns>Vector2 pointing from the sheep to the dog.</returns>
+    public Vector2 GetDogVector()
     {
+        return gameController.dog.transform.position - transform.position;
+    }
+    void OnDrawGizmos()
+    {/*
         Gizmos.color = Color.red;
         //Check that it is being run in Play Mode, so it doesn't try to draw this in Editor mode
         if (m_Started)
@@ -176,7 +216,7 @@ public class SheepController : MonoBehaviour
             //Draw a cube where the OverlapBox is (positioned where your GameObject is as well as a size)
             //Gizmos.DrawWireCube(transform.position, transform.localScale*10);
             Gizmos.DrawWireSphere(transform.position, testRadius);
-        }
+        }*/
     }
     
 }

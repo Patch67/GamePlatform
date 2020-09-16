@@ -5,6 +5,7 @@ public class GameController : MonoBehaviour
 {
     public GameObject sheepPrefab;
     public GameObject[] flock;
+    [Range(1, 500)]
     public int noOfSheep;
     public Dog dogPrefab, dog;
     private bool paused;
@@ -18,11 +19,12 @@ public class GameController : MonoBehaviour
         {
             flock[i] = Instantiate(sheepPrefab);  // Problem here: Instantiate only makes GameObjects but I want a SheepController
             flock[i].transform.position = new Vector2(UnityEngine.Random.value * 9 - 4.5f, UnityEngine.Random.value * 7 - 3.5f);
+            flock[i].name += i;
         }
 
         dog = Instantiate(dogPrefab);
         dog.transform.position = new Vector2(0, 0);
-        dog.state = Dog.State.LeftFlank;
+        dog.state = Dog.State.ThatllDo;
 
         paused = false;
     }
@@ -62,7 +64,7 @@ public class GameController : MonoBehaviour
         {
             dog.state = Dog.State.RightFlank;
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        else if (Input.GetKeyDown(KeyCode.Space))
         {
             dog.state = Dog.State.LieDown;
         }
@@ -70,7 +72,7 @@ public class GameController : MonoBehaviour
         {
             dog.state = Dog.State.WalkOn;
         }
-        else if (Input.GetKeyDown(KeyCode.Space))
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             dog.state = Dog.State.Steady;
         }

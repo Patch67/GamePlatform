@@ -11,8 +11,11 @@ public class Dog : MonoBehaviour
     public State state;
 
     public Vector2 myVector;
+    private Vector2 myScanAngle;
 
     private Rigidbody2D m_rigidbody2D;
+
+    private bool m_started;
 
     // Start is called before the first frame update
     void Start()
@@ -22,10 +25,12 @@ public class Dog : MonoBehaviour
 
         //flockController = FindObjectOfType<FlockController>();
         myVector = new Vector2(0, 0.5f); //Set initial vector north, half speed
+        myScanAngle = new Vector2(0, 1);  //Start scanning north
+        m_started = true;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         switch (state)
         {
@@ -33,37 +38,48 @@ public class Dog : MonoBehaviour
                 myVector = Vector2.zero;
                 break;
             case State.WalkOn:
-                /*speed = 0.5f;
-                //Move in direction of angle
-                Quaternion rotation = Quaternion.Euler(0, 0, direction); // Rotate around Z; suitable for 2D X,Y coordinates
-                Matrix4x4 m = Matrix4x4.identity;
-                m.SetTRS(transform.position, rotation, new Vector3(1, 1, 0));// Set up matrix
-                transform.position = transform.position + m.MultiplyVector(new Vector3(speed * Time.deltaTime, 0, 0));*/
-
-                //TODO: Put a speed limit on myVector
-                m_rigidbody2D.AddForce(myVector * Time.deltaTime, ForceMode2D.Impulse);
+                if(m_rigidbody2D.velocity.sqrMagnitude<1)
+                {
+                    myVector = new Vector2(0, 2);
+                }
+                else
+                { 
+                    myVector = new Vector2(m_rigidbody2D.velocity.x, m_rigidbody2D.velocity.y);
+                    myVector /= 2;
+                }
                 break;
             case State.LeftFlank:
-                /*speed = 0.1f;
-                transform.position = Vector3.Slerp(transform.position, flockController.flock[0].transform.position, speed*Time.deltaTime);*/
-
-                //Find the sheep on the left of my field of view
-
+                //myVector =new Vector2(m_rigidbody2D.velocity.y, m_rigidbody2D.velocity.x); // Quick trick to rotate by 270 degrees
+                myVector = new Vector2(-2, 0);
                 break;
             case State.RightFlank:
-                /*speed = 0.1f;
-                transform.position = Vector3.Slerp(transform.position, flockController.flock[0].transform.position, speed * Time.deltaTime);*/
+                //myVector = new Vector2(-m_rigidbody2D.velocity.y, m_rigidbody2D.velocity.x); // Quick trick to rotate by 270 degrees                
+                myVector = new Vector2(2, 0);
                 break;
             case State.Steady:
-                myVector /= 2;
+                myVector = new Vector2(0, -2);
                 break;
             case State.LookBack:
-                //TODO: 
                 break;
             case State.ThatllDo:
-                //speed = 0;
                 myVector = Vector2.zero;
                 break;
+        }
+        m_rigidbody2D.AddForce(myVector * Time.deltaTime, ForceMode2D.Impulse);
+    }
+
+    void OnDrawGizmos()
+    {
+        
+        //Check that it is being run in Play Mode, so it doesn't try to draw this in Editor mode
+        if (m_started)
+        {
+            //Draw a cube where the OverlapBox is (positioned where your GameObject is as well as a size)
+            //Gizmos.DrawWireCube(transform.position, transform.localScale*10);
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(transform.position, myScanAngle*5);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(transform.position, myVector);
         }
     }
 }

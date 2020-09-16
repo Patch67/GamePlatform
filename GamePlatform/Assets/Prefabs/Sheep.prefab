@@ -136,5 +136,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   testRadius: 1
   neighbours: []
-  fear: 0.25
+  fear: 0.1
   noOfSheep: 7

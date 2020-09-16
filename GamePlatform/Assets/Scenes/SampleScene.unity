@@ -673,7 +673,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sheepPrefab: {fileID: 5596595919883764904, guid: 225d1f958cd93ef4487957b7e8bc63e8, type: 3}
   flock: []
-  noOfSheep: 50
+  noOfSheep: 44
   dogPrefab: {fileID: 6101913371005725971, guid: f9e25d24b90f5784886371f854bd488c, type: 3}
   dog: {fileID: 0}
 --- !u!4 &2068663047
